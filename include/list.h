@@ -16,7 +16,6 @@ struct list {
 	struct list_node *tail;
 };
 
-void list_init(struct list *list);
 void list_append_node(struct list *list, struct list_node *node);
 void list_prepend_node(struct list *list, struct list_node *node);
 void list_remove_node(struct list *list, struct list_node *node);

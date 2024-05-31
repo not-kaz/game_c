@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
 	struct config_entry *entry = NULL;
 
 	memset(&config, 0, sizeof(struct config));
-	config_add_entry(&config, "1234567890123456789012345678901", 123);
+	config_add_entry(&config, "test", 123);
+	config_add_entry(&config, "test", 444);
 	entry = config_find_entry(&config, "test");
 	if (entry) {
 		printf("%s-%d\n", entry->key, entry->value);

@@ -1,15 +1,6 @@
 #include <stddef.h>
 #include "list.h"
 
-void list_init(struct list *list)
-{
-	if (!list) {
-		return;
-	}
-	list->head = NULL;
-	list->tail = NULL;
-}
-
 void list_append_node(struct list *list, struct list_node *node)
 {
 	if (!list || !node) {
