@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "config.h"
 #include "common.h"
-#include "gfx.h"
+#include "graphics.h"
 #include "input.h"
 
 #define SDL_INIT_FLAG (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
@@ -21,10 +21,7 @@ int main(int argc, char *argv[])
 	memset(&config, 0, sizeof(struct config));
 	config_add_entry(&config, "test", 123);
 	config_add_entry(&config, "test", 444);
-	entry = config_find_entry(&config, "test");
-	if (entry) {
-		printf("%s-%d\n", entry->key, entry->value);
-	}
+	printf("%d\n", config_get_entry_val(&config, "test"));
 	UNUSED(argc);
 	UNUSED(argv);
 	if (SDL_Init(SDL_INIT_FLAG) != 0) {
@@ -35,17 +32,17 @@ int main(int argc, char *argv[])
 		SDL_Log("Failed to initialize SDL image library.\n");
 		return 1;
 	}
-	gfx_setup();
+	graphics_setup();
 	game_ctx.is_running = true;
 	while (game_ctx.is_running) {
 		input_poll();
 		if (input_is_key_down(SDL_SCANCODE_ESCAPE)) {
 			game_ctx.is_running = false;
 		}
-		gfx_clear_framebuffer();
-		gfx_present_framebuffer();
+		graphics_clear_framebuffer();
+		graphics_present_framebuffer();
 	}
-	gfx_shutdown();
+	graphics_shutdown();
 	IMG_Quit();
 	SDL_Quit();
 	return 0;

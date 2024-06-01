@@ -1,21 +1,25 @@
 #include <glad/gl.h>
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "config.h"
-#include "gfx.h"
+#include "graphics.h"
 
 #define MAX_NUM_DISPLAY_MODES 512
 
-static struct config gfx_config;
-const char *gfx_config_filename = "graphics.cfg";
-static struct SDL_Window *window;
-static struct SDL_GLContext *gl_ctx;
 static struct {
 	SDL_DisplayMode modes[MAX_NUM_DISPLAY_MODES];
 	int num_modes;
 	int curr_mode_idx;
 	int idx;
 } display;
+static struct {
+	SDL_Window *window;
+	SDL_GLContext *gl_ctx;
+	bool is_initialized;
+} sdl_ctx;
+static struct config graphics_config;
+const char *graphics_config_filename = "graphics.cfg";
 
 static void fetch_display_modes(void)
 {
@@ -39,36 +43,36 @@ static void fetch_display_modes(void)
 	}
 }
 
-void gfx_setup(void)
+void graphics_setup(void)
 {
 	int ww;
 	int wh;
 	unsigned int wf;
 
-	if (window || gl_ctx) {
+	if (sdl_ctx.is_initialized) {
 		return;
 	}
 	memset(&display, 0, sizeof(display));
 	fetch_display_modes();
-	config_add_entry(&gfx_config, "window_width",
+	config_add_entry(&graphics_config, "window_width",
 		display.modes[display.curr_mode_idx].w);
-	config_add_entry(&gfx_config, "window_height",
+	config_add_entry(&graphics_config, "window_height",
 		display.modes[display.curr_mode_idx].h);
-	config_add_entry(&gfx_config, "fullscreen", 1);
-	config_add_entry(&gfx_config, "vsync", 1);
-	if (!config_read_from_file(&gfx_config, "graphics.cfg")) {
+	config_add_entry(&graphics_config, "fullscreen", 1);
+	config_add_entry(&graphics_config, "vsync", 1);
+	if (!config_read_from_file(&graphics_config, "graphics.cfg")) {
 		fprintf(stderr, "Failed to load graphics config file (%s).\n",
-			gfx_config_filename);
+			graphics_config_filename);
 	}
-	ww = config_get_entry_val(&gfx_config, "window_width");
-	wh = config_get_entry_val(&gfx_config, "window_height");
+	ww = config_get_entry_val(&graphics_config, "window_width");
+	wh = config_get_entry_val(&graphics_config, "window_height");
 	wf = SDL_WINDOW_OPENGL;
-	if (config_get_entry_val(&gfx_config, "fullscreen")) {
+	if (config_get_entry_val(&graphics_config, "fullscreen")) {
 		wf |= SDL_WINDOW_FULLSCREEN;
 	}
-	window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
+	sdl_ctx.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, ww, wh, wf);
-	if (!window) {
+	if (!sdl_ctx.window) {
 		fprintf(stderr, "Failed to create window. %s\n",
 			SDL_GetError());
 		exit(EXIT_FAILURE);
@@ -79,8 +83,8 @@ void gfx_setup(void)
 		SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-	gl_ctx = SDL_GL_CreateContext(window);
-	if (!gl_ctx) {
+	sdl_ctx.gl_ctx = SDL_GL_CreateContext(sdl_ctx.window);
+	if (!sdl_ctx.gl_ctx) {
 		fprintf(stderr, "Failed to create OpenGL context. %s\n",
 			SDL_GetError());
 		exit(EXIT_FAILURE);
@@ -89,28 +93,34 @@ void gfx_setup(void)
 		fprintf(stderr, "Failed to load OpenGL functions.\n");
 		exit(EXIT_FAILURE);
 	}
+	sdl_ctx.is_initialized = true;
 	glEnable(GL_DEPTH_TEST);
 	// TODO: We need to call glViewport() every time window resizes.
 	glViewport(0, 0, ww, wh);
-	//config_store_to_file(&gfx_config, "graphics.cfg");
+	//config_store_to_file(&graphics_config, "graphics.cfg");
 }
 
-void gfx_shutdown(void)
+void graphics_shutdown(void)
 {
-	// REVIEW: Is using memset() an optimization and how likely will it
-	//	   cause bugs if NULL is not 0x0. Profile versus simple loop.
+	// NOTE: This is kind of unnecessary since we should always bail out
+	//	 of the game itself if we shutdown the graphics, but
+	//	 theoretically this allows us to reset the graphics subsystem
+	//	 without affecting the game itself.
+	memset(&graphics_config, 0, sizeof(struct config));
 	memset(&display, 0, sizeof(display));
-	SDL_GL_DeleteContext(gl_ctx);
-	SDL_DestroyWindow(window);
+	SDL_GL_DeleteContext(sdl_ctx.gl_ctx);
+	sdl_ctx.gl_ctx = NULL;
+	SDL_DestroyWindow(sdl_ctx.window);
+	sdl_ctx.window = NULL;
 }
 
-void gfx_clear_framebuffer(void)
+void graphics_clear_framebuffer(void)
 {
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 255.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void gfx_present_framebuffer(void)
+void graphics_present_framebuffer(void)
 {
-	SDL_GL_SwapWindow(window);
+	SDL_GL_SwapWindow(sdl_ctx.window);
 }
