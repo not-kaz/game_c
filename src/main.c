@@ -16,7 +16,6 @@ static struct {
 int main(int argc, char *argv[])
 {
 	struct config config;
-	struct config_entry *entry = NULL;
 
 	memset(&config, 0, sizeof(struct config));
 	config_add_entry(&config, "test", 123);
