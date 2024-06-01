@@ -32,10 +32,7 @@ bool input_is_button_down(uint32_t button)
 	return (bool) (SDL_GetMouseState(NULL, NULL) & button);
 }
 
-struct vec2i input_mouse_position(void)
+void input_mouse_pos(int32_t *x_out, int32_t *y_out)
 {
-	struct vec2i pos;
-
-	SDL_GetMouseState(&pos.x, &pos.y);
-	return pos;
+	SDL_GetMouseState(x_out, y_out);
 }
