@@ -8,7 +8,7 @@
 
 struct config_entry {
 	char key[CONFIG_ENTRY_KEY_MAXLEN];
-	int value;
+	int val;
 };
 
 struct config {
@@ -17,8 +17,9 @@ struct config {
 	size_t size;
 };
 
-void config_add_entry(struct config *config, const char  *key, int value);
-struct config_entry *config_find_entry(struct config *config, const char *key);
-void config_remove_entry(struct config *config, char *key);
+int config_add_entry(struct config *config, const char  *key, int val);
+int config_remove_entry(struct config *config, char *key);
+int config_get_entry_val(struct config *config, const char *key);
+int config_read_from_file(struct config *config, const char *filename);
 
 #endif
