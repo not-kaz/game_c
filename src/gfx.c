@@ -19,24 +19,21 @@ static struct {
 
 static void fetch_display_modes(void)
 {
-	memset(&display, 0, sizeof(display));
 	display.num_modes = SDL_GetNumDisplayModes(display.idx);
 	if (display.num_modes < 1 ) {
 		fprintf(stderr, "Failed to fetch available display modes.\n");
 		exit(EXIT_FAILURE);
 	}
-	fprintf(stderr, "%d\n", display.num_modes);
 	if (display.num_modes > MAX_NUM_DISPLAY_MODES) {
 		fprintf(stderr, "Number of found display modes found (%d) "
 			"exceeds our limit (%d). Not all resolutions will be "
-			"available.\n", display.num_modes, MAX_NUM_DISPLAY_MODES);
+			"available.\n", display.num_modes,
+			MAX_NUM_DISPLAY_MODES);
 		display.num_modes = MAX_NUM_DISPLAY_MODES;
 	}
-	fprintf(stderr, "%d\n", display.num_modes);
 	for (int i = 0; i < display.num_modes; i++) {
 		if (SDL_GetDisplayMode(display.idx, i, &display.modes[i]) < 0) {
 			fprintf(stderr, "Failed to retrieve display info.\n");
-			fprintf(stderr, "%d\n", i);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -51,6 +48,7 @@ void gfx_setup(void)
 	if (window || gl_ctx) {
 		return;
 	}
+	memset(&display, 0, sizeof(display));
 	fetch_display_modes();
 	config_add_entry(&gfx_config, "window_width",
 		display.modes[display.curr_mode_idx].w);
