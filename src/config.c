@@ -34,7 +34,7 @@ int config_add_entry(struct config *config, const char *key, int val)
 	return 1;
 }
 
-int config_remove_entry(struct config *config, char *key)
+int config_remove_entry(struct config *config, const char *key)
 {
 	size_t len;
 
