@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "common.h"
 #include "config.h"
 #include "graphics.h"
 
@@ -43,14 +44,15 @@ static void fetch_display_modes(void)
 	}
 }
 
-void graphics_setup(void)
+int graphics_init(void)
 {
 	int ww;
 	int wh;
 	unsigned int wf;
 
 	if (sdl_ctx.is_initialized) {
-		return;
+		fprintf(stderr, "Attempted to initialize SDL context again.\n");
+		return RETURN_CODE_FAILURE;
 	}
 	memset(&display, 0, sizeof(display));
 	fetch_display_modes();
@@ -75,7 +77,7 @@ void graphics_setup(void)
 	if (!sdl_ctx.window) {
 		fprintf(stderr, "Failed to create window. %s\n",
 			SDL_GetError());
-		exit(EXIT_FAILURE);
+		return RETURN_CODE_FAILURE;
 	}
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -87,20 +89,21 @@ void graphics_setup(void)
 	if (!sdl_ctx.gl_ctx) {
 		fprintf(stderr, "Failed to create OpenGL context. %s\n",
 			SDL_GetError());
-		exit(EXIT_FAILURE);
+		return RETURN_CODE_FAILURE;
 	}
 	if (!gladLoadGL((GLADloadfunc)(SDL_GL_GetProcAddress))) {
 		fprintf(stderr, "Failed to load OpenGL functions.\n");
-		exit(EXIT_FAILURE);
+		return RETURN_CODE_FAILURE;
 	}
 	sdl_ctx.is_initialized = true;
 	glEnable(GL_DEPTH_TEST);
 	// TODO: We need to call glViewport() every time window resizes.
 	glViewport(0, 0, ww, wh);
 	//config_store_to_file(&graphics_config, "graphics.cfg");
+	return RETURN_CODE_SUCCESS;
 }
 
-void graphics_shutdown(void)
+void graphics_finish(void)
 {
 	// NOTE: This is kind of unnecessary since we should always bail out
 	//	 of the game itself if we shutdown the graphics, but
@@ -109,8 +112,8 @@ void graphics_shutdown(void)
 	memset(&graphics_config, 0, sizeof(struct config));
 	memset(&display, 0, sizeof(display));
 	SDL_GL_DeleteContext(sdl_ctx.gl_ctx);
-	sdl_ctx.gl_ctx = NULL;
 	SDL_DestroyWindow(sdl_ctx.window);
+	sdl_ctx.gl_ctx = NULL;
 	sdl_ctx.window = NULL;
 }
 
