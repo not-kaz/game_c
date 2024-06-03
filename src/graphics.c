@@ -105,10 +105,6 @@ int graphics_init(void)
 
 void graphics_finish(void)
 {
-	// NOTE: This is kind of unnecessary since we should always bail out
-	//	 of the game itself if we shutdown the graphics, but
-	//	 theoretically this allows us to reset the graphics subsystem
-	//	 without affecting the game itself.
 	memset(&graphics_config, 0, sizeof(struct config));
 	memset(&display, 0, sizeof(display));
 	SDL_GL_DeleteContext(sdl_ctx.gl_ctx);
