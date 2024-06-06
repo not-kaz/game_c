@@ -40,9 +40,9 @@ handle_err:
 	if (shader->id) {
 		glDeleteShader(shader->id);
 	}
-	fprintf(stderr, "Shader compilation failed: %s\n");
+	fprintf(stderr, "Shader compilation failed: %s\n", err_msg);
 	if (gl_msg[0] != '\0') {
-		fprintf(stderr, "%s\n");
+		fprintf(stderr, "%s\n", gl_msg);
 	}
 	return RETURN_CODE_FAILURE;
 }
