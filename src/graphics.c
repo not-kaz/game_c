@@ -20,14 +20,14 @@ static struct {
 	bool is_initialized;
 } sdl_ctx;
 static struct config graphics_config;
-const char *graphics_config_filename = "graphics.cfg";
+const char *graphics_config_name = "graphics.cfg";
 
-static void fetch_display_modes(void)
+static int fetch_display_modes(void)
 {
 	display.num_modes = SDL_GetNumDisplayModes(display.idx);
 	if (display.num_modes < 1 ) {
 		fprintf(stderr, "Failed to fetch available display modes.\n");
-		exit(EXIT_FAILURE);
+		return RETURN_CODE_FAILURE;
 	}
 	if (display.num_modes > MAX_NUM_DISPLAY_MODES) {
 		fprintf(stderr, "Number of found display modes found (%d) "
@@ -39,13 +39,15 @@ static void fetch_display_modes(void)
 	for (int i = 0; i < display.num_modes; i++) {
 		if (SDL_GetDisplayMode(display.idx, i, &display.modes[i]) < 0) {
 			fprintf(stderr, "Failed to retrieve display info.\n");
-			exit(EXIT_FAILURE);
+			return RETURN_CODE_FAILURE;
 		}
 	}
+	return RETURN_CODE_SUCCESS;
 }
 
 int graphics_init(void)
 {
+	const char *err_msg = NULL;
 	int ww = 0;
 	int wh = 0;
 	unsigned int wf = SDL_WINDOW_OPENGL;
@@ -55,16 +57,20 @@ int graphics_init(void)
 		return RETURN_CODE_FAILURE;
 	}
 	memset(&display, 0, sizeof(display));
-	fetch_display_modes();
+	if (!fetch_display_modes()) {
+		err_msg = "Could not fetch necessary display info.";
+		goto handle_err;
+	}
+	config_init(&graphics_config, graphics_config_name);
 	config_add_entry(&graphics_config, "window_width",
 		display.modes[display.curr_mode_idx].w);
 	config_add_entry(&graphics_config, "window_height",
 		display.modes[display.curr_mode_idx].h);
 	config_add_entry(&graphics_config, "fullscreen", 1);
 	config_add_entry(&graphics_config, "vsync", 1);
-	if (!config_read_from_file(&graphics_config, "graphics.cfg")) {
+	if (!config_read_from_file(&graphics_config, graphics_config_name)) {
 		fprintf(stderr, "Failed to load graphics config file (%s).\n",
-			graphics_config_filename);
+			graphics_config_name);
 	}
 	ww = config_get_entry_val(&graphics_config, "window_width");
 	wh = config_get_entry_val(&graphics_config, "window_height");
@@ -74,9 +80,8 @@ int graphics_init(void)
 	sdl_ctx.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, ww, wh, wf);
 	if (!sdl_ctx.window) {
-		fprintf(stderr, "Failed to create window. %s\n",
-			SDL_GetError());
-		return RETURN_CODE_FAILURE;
+		err_msg = SDL_GetError();
+		goto handle_err;
 	}
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -86,13 +91,12 @@ int graphics_init(void)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	sdl_ctx.gl_ctx = SDL_GL_CreateContext(sdl_ctx.window);
 	if (!sdl_ctx.gl_ctx) {
-		fprintf(stderr, "Failed to create OpenGL context. %s\n",
-			SDL_GetError());
-		return RETURN_CODE_FAILURE;
+		err_msg = SDL_GetError();
+		goto handle_err;
 	}
 	if (!gladLoadGL((GLADloadfunc)(SDL_GL_GetProcAddress))) {
-		fprintf(stderr, "Failed to load OpenGL functions.\n");
-		return RETURN_CODE_FAILURE;
+		err_msg = "Failed to load OpenGL functions.";
+		goto handle_err;
 	}
 	sdl_ctx.is_initialized = true;
 	glEnable(GL_DEPTH_TEST);
@@ -100,6 +104,15 @@ int graphics_init(void)
 	glViewport(0, 0, ww, wh);
 	//config_store_to_file(&graphics_config, "graphics.cfg");
 	return RETURN_CODE_SUCCESS;
+handle_err:
+	memset(&display, 0, sizeof(display));
+	config_finish(&graphics_config);
+	SDL_GL_DeleteContext(sdl_ctx.gl_ctx);
+	SDL_DestroyWindow(sdl_ctx.window);
+	sdl_ctx.gl_ctx = NULL;
+	sdl_ctx.window = NULL;
+	fprintf(stderr, "%s\n", err_msg);
+	return RETURN_CODE_FAILURE;
 }
 
 void graphics_finish(void)
