@@ -8,7 +8,7 @@
 
 static int compile_shader(struct shader *shader)
 {
-	char *err_msg = NULL;
+	const char *err_msg = NULL;
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 	const char *tmp[1] = {NULL};
@@ -52,7 +52,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 		const char *vertex_shader_src, const char *fragment_shader_src)
 {
 	size_t len = 0;
-	char *err_msg = NULL;
+	const char *err_msg = NULL;
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
