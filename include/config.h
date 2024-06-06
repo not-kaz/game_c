@@ -17,6 +17,8 @@ struct config {
 	size_t size;
 };
 
+int config_init(struct config *config, const char *name);
+void config_finish(struct config *config);
 int config_add_entry(struct config *config, const char *key, int val);
 int config_remove_entry(struct config *config, const char *key);
 int config_get_entry_val(struct config *config, const char *key);
