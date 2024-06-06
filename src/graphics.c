@@ -122,3 +122,8 @@ void graphics_present_framebuffer(void)
 {
 	SDL_GL_SwapWindow(sdl_ctx.window);
 }
+
+void graphics_get_window_size(int *width_out, int *height_out)
+{
+	SDL_GetWindowSize(sdl_ctx.window, width_out, height_out);
+}
