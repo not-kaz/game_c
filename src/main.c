@@ -5,7 +5,9 @@ int main(int argc, char *argv[])
 {
 	UNUSED(argc);
 	UNUSED(argv);
-	game_init();
+	if (!game_init()) {
+		return 1;
+	}
 	while (game_is_running()) {
 		game_update();
 	}
