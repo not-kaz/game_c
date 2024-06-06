@@ -32,6 +32,7 @@ static int compile_shader(struct shader *shader)
 	glGetShaderiv(shader->id, GL_COMPILE_STATUS, &gl_res);
 	if (!gl_res) {
 		glGetShaderInfoLog(shader->id, GL_MSG_MAXLEN, NULL, gl_msg);
+		err_msg = "glCompileShader() has failed.";
 		goto handle_err;
 	}
 	shader->is_compiled = true;
@@ -98,6 +99,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 	glGetProgramiv(program->id, GL_LINK_STATUS, &gl_res);
 	if (!gl_res) {
 		glGetProgramInfoLog(program->id, GL_MSG_MAXLEN, NULL, gl_msg);
+		err_msg = "glLinkProgram() has failed.";
 		goto handle_err;
 	}
 	program->is_inited = true;
