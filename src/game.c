@@ -5,6 +5,7 @@
 #include "game.h"
 #include "graphics.h"
 #include "input.h"
+#include "shader.h"
 
 #define SDL_INIT_FLAG (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
 #define IMG_INIT_FLAG (IMG_INIT_PNG)
@@ -22,39 +23,58 @@ enum game_state {
 static struct {
 	enum game_state state;
 	bool is_running;
+	bool is_inited;
 } game_ctx;
-
-static int init_sdl(void)
-{
-	if (SDL_Init(SDL_INIT_FLAG) != 0) {
-		fprintf(stderr, "Failed to initialize SDL. %s\n",
-			SDL_GetError());
-		return RETURN_CODE_FAILURE;
-	}
-	if (IMG_Init(IMG_INIT_FLAG) != IMG_INIT_FLAG) {
-		fprintf(stderr, "Failed to initialize SDL image library. %s\n",
-			IMG_GetError());
-		return RETURN_CODE_FAILURE;
-	}
-	return RETURN_CODE_SUCCESS;
-}
+static struct shader_program shd;
+const char *vsrc = "#version 330 core\n"
+	"layout (location = 0) in vec3 aPos;\n"
+	"void main()\n"
+	"{\n"
+	"   gl_Position = vec4(aPos, 1.0);\n"
+	"}\0";
+const char *fsrc = "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = ourColor;\n"
+    "}\n\0";
 
 int game_init(void)
 {
+	const char *err_msg = NULL;
+
+	if (game_ctx.is_inited) {
+		err_msg = "Game context already initialized.";
+		goto handle_err;
+	}
 	game_ctx.state = GAME_STATE_GAMEPLAY;
 	game_ctx.is_running = true;
-	if (!init_sdl()) {
-		return RETURN_CODE_FAILURE;
+	if (SDL_Init(SDL_INIT_FLAG) != 0) {
+		err_msg = SDL_GetError();
+		goto handle_err;
+	}
+	if (IMG_Init(IMG_INIT_FLAG) != IMG_INIT_FLAG) {
+		err_msg = IMG_GetError();
+		goto handle_err;
 	}
 	if (!graphics_init()) {
-		return RETURN_CODE_FAILURE;
+		err_msg = "Graphics subsystem failed to initialize.";
+		goto handle_err;
 	}
+	shader_program_init(&shd, "test", vsrc, fsrc);
+	game_ctx.is_inited = true;
 	return RETURN_CODE_SUCCESS;
+handle_err:
+	fprintf(stderr, "Game context initialization failed: %s\n", err_msg);
+	return RETURN_CODE_FAILURE;
 }
 
 void game_finish(void)
 {
 	graphics_finish();
+	IMG_Quit();
+	SDL_Quit();
 	memset(&game_ctx, 0, sizeof(game_ctx));
 }
 
