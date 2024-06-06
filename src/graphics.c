@@ -17,7 +17,6 @@ static struct {
 static struct {
 	SDL_Window *window;
 	SDL_GLContext *gl_ctx;
-	bool is_initialized;
 } sdl_ctx;
 static struct config graphics_config;
 const char *graphics_config_name = "graphics.cfg";
@@ -48,11 +47,12 @@ static int fetch_display_modes(void)
 int graphics_init(void)
 {
 	const char *err_msg = NULL;
+	const char *sdl_msg = NULL;
 	int ww = 0;
 	int wh = 0;
 	unsigned int wf = SDL_WINDOW_OPENGL;
 
-	if (sdl_ctx.is_initialized) {
+	if (sdl_ctx.window || sdl_ctx.gl_ctx) {
 		fprintf(stderr, "Attempted to initialize SDL context again.\n");
 		return RETURN_CODE_FAILURE;
 	}
@@ -80,7 +80,8 @@ int graphics_init(void)
 	sdl_ctx.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, ww, wh, wf);
 	if (!sdl_ctx.window) {
-		err_msg = SDL_GetError();
+		err_msg = "Failed to create SDL window.";
+		sdl_msg = SDL_GetError();
 		goto handle_err;
 	}
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -91,14 +92,14 @@ int graphics_init(void)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	sdl_ctx.gl_ctx = SDL_GL_CreateContext(sdl_ctx.window);
 	if (!sdl_ctx.gl_ctx) {
-		err_msg = SDL_GetError();
+		err_msg = "Failed to create SDL GL context.";
+		sdl_msg = SDL_GetError();
 		goto handle_err;
 	}
 	if (!gladLoadGL((GLADloadfunc)(SDL_GL_GetProcAddress))) {
 		err_msg = "Failed to load OpenGL functions.";
 		goto handle_err;
 	}
-	sdl_ctx.is_initialized = true;
 	glEnable(GL_DEPTH_TEST);
 	// TODO: We need to call glViewport() every time window resizes.
 	glViewport(0, 0, ww, wh);
@@ -112,6 +113,9 @@ handle_err:
 	sdl_ctx.gl_ctx = NULL;
 	sdl_ctx.window = NULL;
 	fprintf(stderr, "Graphics initialization failed: %s\n", err_msg);
+	if (sdl_msg) {
+		fprintf(stderr, "%s\n", sdl_msg);
+	}
 	return RETURN_CODE_FAILURE;
 }
 
