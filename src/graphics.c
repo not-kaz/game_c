@@ -46,9 +46,9 @@ static void fetch_display_modes(void)
 
 int graphics_init(void)
 {
-	int ww;
-	int wh;
-	unsigned int wf;
+	int ww = 0;
+	int wh = 0;
+	unsigned int wf = SDL_WINDOW_OPENGL;
 
 	if (sdl_ctx.is_initialized) {
 		fprintf(stderr, "Attempted to initialize SDL context again.\n");
@@ -68,7 +68,6 @@ int graphics_init(void)
 	}
 	ww = config_get_entry_val(&graphics_config, "window_width");
 	wh = config_get_entry_val(&graphics_config, "window_height");
-	wf = SDL_WINDOW_OPENGL;
 	if (config_get_entry_val(&graphics_config, "fullscreen")) {
 		wf |= SDL_WINDOW_FULLSCREEN;
 	}

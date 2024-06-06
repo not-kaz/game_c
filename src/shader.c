@@ -56,7 +56,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
-	if (!program || !name || !vertex_shader_src || !fragment_shader_src){
+	if (!program || !name || !vertex_shader_src || !fragment_shader_src) {
 		err_msg = "One or more arguments are not valid.";
 		goto handle_err;
 	}
