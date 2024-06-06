@@ -5,7 +5,7 @@
 
 void input_poll(void)
 {
-	SDL_Event event;
+	SDL_Event event = {0};
 
 	SDL_PollEvent(&event);
 	if (event.type == SDL_QUIT) {
@@ -15,7 +15,7 @@ void input_poll(void)
 
 bool input_is_key_down(SDL_Scancode scancode)
 {
-	const uint8_t *keyboard_state;
+	const uint8_t *keyboard_state = NULL;
 
 	keyboard_state = SDL_GetKeyboardState(NULL);
 	if (scancode > SDL_NUM_SCANCODES || !keyboard_state) {

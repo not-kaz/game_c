@@ -10,7 +10,7 @@
 
 int config_add_entry(struct config *config, const char *key, int val)
 {
-	size_t len;
+	size_t len = 0;
 
 	if (!config || config->size >= CONFIG_MAX_NUM_ENTRIES || !key) {
 		return 0;
@@ -36,7 +36,7 @@ int config_add_entry(struct config *config, const char *key, int val)
 
 int config_remove_entry(struct config *config, const char *key)
 {
-	size_t len;
+	size_t len = 0;
 
 	if (!config || !key) {
 		return 0;
@@ -54,7 +54,7 @@ int config_remove_entry(struct config *config, const char *key)
 
 int config_get_entry_val(struct config *config, const char *key)
 {
-	size_t len;
+	size_t len = 0;
 
 	if (!config || !key) {
 		return 0;
