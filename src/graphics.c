@@ -111,7 +111,7 @@ handle_err:
 	SDL_DestroyWindow(sdl_ctx.window);
 	sdl_ctx.gl_ctx = NULL;
 	sdl_ctx.window = NULL;
-	fprintf(stderr, "%s\n", err_msg);
+	fprintf(stderr, "Graphics initialization failed: %s\n", err_msg);
 	return RETURN_CODE_FAILURE;
 }
 
