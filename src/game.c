@@ -23,7 +23,6 @@ enum game_state {
 static struct {
 	enum game_state state;
 	bool is_running;
-	bool is_inited;
 } game_ctx;
 static struct shader_program shd;
 const char *vsrc = "#version 330 core\n"
@@ -44,7 +43,7 @@ int game_init(void)
 {
 	const char *err_msg = NULL;
 
-	if (game_ctx.is_inited) {
+	if (game_ctx.state != GAME_STATE_UNDEFINED) {
 		err_msg = "Game context already initialized.";
 		goto handle_err;
 	}
