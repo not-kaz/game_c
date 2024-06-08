@@ -62,7 +62,6 @@ int game_init(void)
 		goto handle_err;
 	}
 	shader_program_init(&shd, "test", vsrc, fsrc);
-	game_ctx.is_inited = true;
 	return RETURN_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "Game context initialization failed: %s\n", err_msg);
