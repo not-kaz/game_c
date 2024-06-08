@@ -47,10 +47,10 @@ static int fetch_display_modes(void)
 int graphics_init(void)
 {
 	const char *err_msg = NULL;
-	const char *sdl_msg = NULL;
 	int ww = 0;
 	int wh = 0;
 	unsigned int wf = SDL_WINDOW_OPENGL;
+	const char *sdl_msg = NULL;
 
 	if (sdl_ctx.window || sdl_ctx.gl_ctx) {
 		fprintf(stderr, "Attempted to initialize SDL context again.\n");

@@ -9,9 +9,9 @@
 static int compile_shader(struct shader *shader)
 {
 	const char *err_msg = NULL;
+	const char *tmp[1] = {NULL};
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
-	const char *tmp[1] = {NULL};
 
 	if (shader->type == SHADER_TYPE_VERTEX) {
 		shader->id = glCreateShader(GL_VERTEX_SHADER);
@@ -51,8 +51,8 @@ handle_err:
 int shader_program_init(struct shader_program *program, const char *name,
 		const char *vertex_shader_src, const char *fragment_shader_src)
 {
-	size_t len = 0;
 	const char *err_msg = NULL;
+	size_t len = 0;
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
