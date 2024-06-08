@@ -4,9 +4,9 @@
 #define SHADER_SRC_MAXLEN 1024
 #define SHADER_PROGRAM_NAME_MAXLEN 5
 
-enum shader_program_uniform_type {
-	SHADER_PROGRAM_UNIFORM_TYPE_VEC3,
-	SHADER_PROGRAM_UNIFORM_TYPE_NUMOF
+enum shader_uniform_type {
+	SHADER_UNIFORM_TYPE_MAT4,
+	SHADER_UNIFORM_TYPE_NUMOF
 };
 
 enum shader_type {
@@ -33,5 +33,7 @@ struct shader_program {
 int shader_program_init(struct shader_program *program, const char *name,
 		const char *vertex_shader_src, const char *fragment_shader_src);
 void shader_program_finish(struct shader_program *program);
-
+int shader_program_set_uniform_val(struct shader_program *program,
+		const char *uniform_name, enum shader_uniform_type type,
+		const void *val);
 #endif

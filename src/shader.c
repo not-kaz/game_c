@@ -120,3 +120,34 @@ void shader_program_finish(struct shader_program *program)
 	glDeleteProgram(program->id);
 	memset(program, 0, sizeof(struct shader_program));
 }
+
+int shader_program_set_uniform_val(struct shader_program *program,
+		const char *uniform_name, enum shader_uniform_type type,
+		const void *val)
+{
+	const char *err_msg = NULL;
+	int loc = -1;
+
+	if (!program || !uniform_name || !val) {
+		err_msg = "Unable to set shader uniform value. Invalid params.";
+		goto handle_err;
+	}
+	loc = glGetUniformLocation(program->id, uniform_name);
+	if (loc < 0) {
+		err_msg = "glGetUniformLocation() has failed. Name not found.";
+		goto handle_err;
+	}
+	switch (type) {
+	case SHADER_UNIFORM_TYPE_MAT4:
+		glUniformMatrix4fv(loc, 1, GL_FALSE, (const float *)(val));
+		break;
+	default:
+		err_msg = "Incorrect shader uniform type provided.";
+		goto handle_err;
+	}
+	return RETURN_CODE_SUCCESS;
+handle_err:
+	fprintf(stderr, "%s\n", err_msg);
+	return RETURN_CODE_FAILURE;
+}
+
