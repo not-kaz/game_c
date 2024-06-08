@@ -14,32 +14,32 @@ static int compile_shader(struct shader *shader)
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
 	if (shader->type == SHADER_TYPE_VERTEX) {
-		shader->id = glCreateShader(GL_VERTEX_SHADER);
+		shader->gl_id = glCreateShader(GL_VERTEX_SHADER);
 	} else if (shader->type == SHADER_TYPE_FRAGMENT) {
-		shader->id = glCreateShader(GL_FRAGMENT_SHADER);
+		shader->gl_id = glCreateShader(GL_FRAGMENT_SHADER);
 	} else {
 		err_msg = "Shader type mismatch. Vertex or fragment supported.";
 		goto handle_err;
 	}
-	if (!shader->id) {
+	if (!shader->gl_id) {
 		err_msg = "glCreateShader() has failed.";
 		goto handle_err;
 	}
 	// HACK: Find a way to avoid having to use tmp ptr for glShaderSource().
 	tmp[0] = shader->src;
-	glShaderSource(shader->id, 1, tmp, NULL);
-	glCompileShader(shader->id);
-	glGetShaderiv(shader->id, GL_COMPILE_STATUS, &gl_res);
+	glShaderSource(shader->gl_id, 1, tmp, NULL);
+	glCompileShader(shader->gl_id);
+	glGetShaderiv(shader->gl_id, GL_COMPILE_STATUS, &gl_res);
 	if (!gl_res) {
-		glGetShaderInfoLog(shader->id, GL_MSG_MAXLEN, NULL, gl_msg);
+		glGetShaderInfoLog(shader->gl_id, GL_MSG_MAXLEN, NULL, gl_msg);
 		err_msg = "glCompileShader() has failed.";
 		goto handle_err;
 	}
 	shader->is_compiled = true;
 	return RETURN_CODE_SUCCESS;
 handle_err:
-	if (shader->id) {
-		glDeleteShader(shader->id);
+	if (shader->gl_id) {
+		glDeleteShader(shader->gl_id);
 	}
 	fprintf(stderr, "Shader compilation failed: %s\n", err_msg);
 	if (gl_msg[0] != '\0') {
@@ -70,7 +70,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 		goto handle_err;
 	}
 	memset(program, 0, sizeof(struct shader_program));
-	program->id = glCreateProgram();
+	program->gl_id = glCreateProgram();
 	strncpy(program->name, name, len);
 	len = strlen(vertex_shader_src);
 	if (!len || len >= SHADER_SRC_MAXLEN) {
@@ -93,12 +93,12 @@ int shader_program_init(struct shader_program *program, const char *name,
 		err_msg = "One or more shader compilations failed.";
 		goto handle_err;
 	}
-	glAttachShader(program->id, program->vertex_shader.id);
-	glAttachShader(program->id, program->fragment_shader.id);
-	glLinkProgram(program->id);
-	glGetProgramiv(program->id, GL_LINK_STATUS, &gl_res);
+	glAttachShader(program->gl_id, program->vertex_shader.gl_id);
+	glAttachShader(program->gl_id, program->fragment_shader.gl_id);
+	glLinkProgram(program->gl_id);
+	glGetProgramiv(program->gl_id, GL_LINK_STATUS, &gl_res);
 	if (!gl_res) {
-		glGetProgramInfoLog(program->id, GL_MSG_MAXLEN, NULL, gl_msg);
+		glGetProgramInfoLog(program->gl_id, GL_MSG_MAXLEN, NULL, gl_msg);
 		err_msg = "glLinkProgram() has failed.";
 		goto handle_err;
 	}
@@ -115,9 +115,9 @@ handle_err:
 
 void shader_program_finish(struct shader_program *program)
 {
-	glDeleteShader(program->vertex_shader.id);
-	glDeleteShader(program->fragment_shader.id);
-	glDeleteProgram(program->id);
+	glDeleteShader(program->vertex_shader.gl_id);
+	glDeleteShader(program->fragment_shader.gl_id);
+	glDeleteProgram(program->gl_id);
 	memset(program, 0, sizeof(struct shader_program));
 }
 
@@ -132,7 +132,7 @@ int shader_program_set_uniform_val(struct shader_program *program,
 		err_msg = "Unable to set shader uniform value. Invalid params.";
 		goto handle_err;
 	}
-	loc = glGetUniformLocation(program->id, uniform_name);
+	loc = glGetUniformLocation(program->gl_id, uniform_name);
 	if (loc < 0) {
 		err_msg = "glGetUniformLocation() has failed. Name not found.";
 		goto handle_err;

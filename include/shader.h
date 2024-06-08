@@ -17,14 +17,14 @@ enum shader_type {
 
 struct shader {
 	char src[SHADER_SRC_MAXLEN];
-	unsigned int id;
+	unsigned int gl_id;
 	enum shader_type type;
 	bool is_compiled;
 };
 
 struct shader_program {
 	char name[SHADER_PROGRAM_NAME_MAXLEN];
-	unsigned int id;
+	unsigned int gl_id;
 	struct shader vertex_shader;
 	struct shader fragment_shader;
 	bool is_inited;
