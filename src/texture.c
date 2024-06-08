@@ -46,7 +46,6 @@ int texture_init(struct texture *texture, const char *name,
 		GL_UNSIGNED_BYTE, surf->pixels);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SDL_FreeSurface(surf);
-	texture->is_inited = true;
 	return RETURN_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "Failed to initialize texture. %s\n", err_msg);
