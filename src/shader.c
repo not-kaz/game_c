@@ -98,7 +98,8 @@ int shader_program_init(struct shader_program *program, const char *name,
 	glLinkProgram(program->gl_id);
 	glGetProgramiv(program->gl_id, GL_LINK_STATUS, &gl_res);
 	if (!gl_res) {
-		glGetProgramInfoLog(program->gl_id, GL_MSG_MAXLEN, NULL, gl_msg);
+		glGetProgramInfoLog(program->gl_id, GL_MSG_MAXLEN, NULL,
+			gl_msg);
 		err_msg = "glLinkProgram() has failed.";
 		goto handle_err;
 	}
