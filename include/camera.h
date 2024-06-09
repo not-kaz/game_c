@@ -8,8 +8,8 @@ struct camera_direction {
 };
 
 struct camera_rotation {
-	vec3 pitch;
-	vec3 yaw;
+	float pitch;
+	float yaw;
 };
 
 struct camera_ctrl_params {
@@ -27,7 +27,7 @@ struct camera {
 	bool has_target;
 };
 
-int camera_init(struct camera *cam, vec3 position,
+int camera_init(struct camera *cam, vec3 pos, struct camera_direction dir,
 		struct camera_ctrl_params ctrl_params);
 void camera_finish(struct camera *cam);
 void camera_update(struct camera *cam);
