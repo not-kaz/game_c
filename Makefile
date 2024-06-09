@@ -6,10 +6,11 @@ CF = -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes \
      -Wshadow -Wdouble-promotion -Wconversion -Wformat \
      -Wformat-signedness -Wformat-extra-args \
      -Wpointer-arith -Wcast-qual
-LF = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+LF = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lm
 DF = -DDEBUG_MODE
-INC = -Iinclude -Ilib/glad/include 
-SRC = $(wildcard src/*.c) $(wildcard lib/glad/src/*.c)
+INC = -Iinclude -Ilib/glad/include -Ilib/cglm/include
+SRC = $(wildcard src/*.c) $(wildcard lib/glad/src/*.c) \
+      $(wildcard lib/cglm/src/*.c)
  
 all: $(SC)
 	$(CC) -g3 $(CF) $(INC) $(SRC) $(DF) $(LF) 
