@@ -31,6 +31,7 @@ int camera_init(struct camera *cam, vec3 pos, struct camera_direction dir,
 		struct camera_ctrl_params ctrl_params);
 void camera_finish(struct camera *cam);
 void camera_update(struct camera *cam);
+void camera_set_position(struct camera *cam, vec3 pos);
 void camera_set_target(struct camera *cam, vec3 target);
 void camera_clear_target(struct camera *cam);
 void camera_set_ctrl_params(struct camera *cam,
