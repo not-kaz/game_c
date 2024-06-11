@@ -131,7 +131,7 @@ void graphics_finish(void)
 
 void graphics_clear_framebuffer(void)
 {
-	glad_glClearColor(0.0f, 0.0f, 0.0f, 255.0f);
+	glClearColor(0.1f, 0.5f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
