@@ -64,6 +64,7 @@ int texture_bind(struct texture *texture)
 		fprintf(stderr, "Failed to bind texture.\n");
 		return RETURN_CODE_FAILURE;
 	}
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->gl_id);
 	return RETURN_CODE_SUCCESS;
 }
