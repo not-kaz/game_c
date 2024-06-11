@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
+#include "err_msg.h"
 #include "shader.h"
 
 #define GL_MSG_MAXLEN 1024
 
 static int compile_shader(struct shader *shader)
 {
-	char err_msg[ERR_MSG_MAXLEN] = {'\0'};
 	const char *tmp[1] = {NULL};
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
@@ -18,13 +18,11 @@ static int compile_shader(struct shader *shader)
 	} else if (shader->type == SHADER_TYPE_FRAGMENT) {
 		shader->gl_id = glCreateShader(GL_FRAGMENT_SHADER);
 	} else {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
-			"Shader type mismatch. Vertex or fragment supported.");
+		err_msg_set("Shader type mismatch.");
 		goto handle_err;
 	}
 	if (!shader->gl_id) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
-			"glCreateShader() has failed.");
+		err_msg_set("glCreateShader() has failed.");
 		goto handle_err;
 	}
 	// HACK: Find a way to avoid having to use tmp ptr for glShaderSource().
@@ -34,8 +32,7 @@ static int compile_shader(struct shader *shader)
 	glGetShaderiv(shader->gl_id, GL_COMPILE_STATUS, &gl_res);
 	if (!gl_res) {
 		glGetShaderInfoLog(shader->gl_id, GL_MSG_MAXLEN, NULL, gl_msg);
-		snprintf(err_msg, ERR_MSG_MAXLEN,
-			"glCompileShader() has failed.");
+		err_msg_set("glCompileShader() has failed.");
 		goto handle_err;
 	}
 	shader->is_compiled = true;
@@ -44,7 +41,7 @@ handle_err:
 	if (shader->gl_id) {
 		glDeleteShader(shader->gl_id);
 	}
-	fprintf(stderr, "Shader compilation failed: %s\n", err_msg);
+	fprintf(stderr, "compile_shader() has failed: %s\n", err_msg_get());
 	if (gl_msg[0] != '\0') {
 		fprintf(stderr, "%s\n", gl_msg);
 	}
@@ -54,23 +51,22 @@ handle_err:
 int shader_program_init(struct shader_program *program, const char *name,
 		const char *vertex_shader_src, const char *fragment_shader_src)
 {
-	char err_msg[ERR_MSG_MAXLEN] = {'\0'};
 	size_t len = 0;
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
 	if (!program || !name || !vertex_shader_src || !fragment_shader_src) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"One or more arguments are not valid.");
 		goto handle_err;
 	}
 	if (program->is_inited) {
-		snprintf(err_msg, ERR_MSG_MAXLEN, "Already initialized.");
+		err_msg_set( "Already initialized.");
 		goto handle_err;
 	}
 	len = strlen(name);
 	if (!len || len >= SHADER_PROGRAM_NAME_MAXLEN) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"Name is not specified or exceeds limit.");
 		goto handle_err;
 	}
@@ -79,7 +75,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 	strncpy(program->name, name, len);
 	len = strlen(vertex_shader_src);
 	if (!len || len >= SHADER_SRC_MAXLEN) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"Vertex shader source is empty or exceeds limit.");
 		goto handle_err;
 	}
@@ -87,7 +83,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 	program->vertex_shader.type = SHADER_TYPE_VERTEX;
 	len = strlen(fragment_shader_src);
 	if (!len || len >= SHADER_SRC_MAXLEN) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"Fragment shader source is empty or exceeds limit.");
 		goto handle_err;
 	}
@@ -97,7 +93,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 	compile_shader(&program->fragment_shader);
 	if (!program->vertex_shader.is_compiled ||
 			!program->fragment_shader.is_compiled) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"One or more shader compilations failed.");
 		goto handle_err;
 	}
@@ -108,14 +104,15 @@ int shader_program_init(struct shader_program *program, const char *name,
 	if (!gl_res) {
 		glGetProgramInfoLog(program->gl_id, GL_MSG_MAXLEN, NULL,
 			gl_msg);
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"glLinkProgram() has failed.");
 		goto handle_err;
 	}
 	program->is_inited = true;
 	return RETURN_CODE_SUCCESS;
 handle_err:
-	fprintf(stderr, "shader_program_init() has failed: %s\n", err_msg);
+	fprintf(stderr, "shader_program_init() has failed: %s\n",
+		err_msg_get());
 	if (gl_msg[0] != '\0') {
 		fprintf(stderr, "%s\n", gl_msg);
 	}
@@ -140,17 +137,16 @@ int shader_program_set_uniform_val(struct shader_program *program,
 		const char *uniform_name, enum shader_uniform_type type,
 		const void *val)
 {
-	char err_msg[ERR_MSG_MAXLEN] = {'\0'};
 	int loc = -1;
 
 	if (!program || !uniform_name || !val) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"Unable to set shader uniform value. Invalid params.");
 		goto handle_err;
 	}
 	loc = glGetUniformLocation(program->gl_id, uniform_name);
 	if (loc < 0) {
-		snprintf(err_msg, ERR_MSG_MAXLEN,
+		err_msg_set(
 			"glGetUniformLocation() failed. Name (%s) not found.",
 			uniform_name);
 		goto handle_err;
@@ -160,13 +156,13 @@ int shader_program_set_uniform_val(struct shader_program *program,
 		glUniformMatrix4fv(loc, 1, GL_FALSE, (const float *)(val));
 		break;
 	default:
-		snprintf(err_msg, ERR_MSG_MAXLEN, "Incorrect type provided.");
+		err_msg_set( "Incorrect type provided.");
 		goto handle_err;
 	}
 	return RETURN_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "shader_program_set_uniform_val() has failed: %s\n",
-		err_msg);
+		err_msg_get());
 	return RETURN_CODE_FAILURE;
 }
 
