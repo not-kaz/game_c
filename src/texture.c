@@ -3,34 +3,34 @@
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
+#include "err_msg.h"
 #include "texture.h"
 
 int texture_init(struct texture *texture, const char *name,
 		const char *img_filepath)
 {
-	const char *err_msg = NULL;
 	size_t len = 0;
 	SDL_Surface *surf = NULL;
 
 	if (!texture || !name || !img_filepath) {
-		err_msg = "Texture initialization failed. Invalid parameters.";
+		err_msg_set("Invalid parameters.");
 		goto handle_err;
 	}
 	if (texture->name[0] != '\0') {
-		err_msg = "Texture is already initialized.\n";
+		err_msg_set("Texture is already initialized.");
 		goto handle_err;
 	}
 	// COPY name
 	len = strlen(name);
 	if (!len || len >= TEXTURE_NAME_MAXLEN) {
-		err_msg = "Texture name is empty or exceeds limit.";
+		err_msg_set("Texture name is empty or exceeds limit.");
 		goto handle_err;
 	}
 	memset(texture, 0, sizeof(struct texture));
 	strncpy(texture->name, name, len);
 	surf = IMG_Load(img_filepath);
 	if (!surf) {
-		err_msg = IMG_GetError();
+		err_msg_set(IMG_GetError());
 		goto handle_err;
 	}
 	// HACK: The following parameters are currently hardcoded but should be
@@ -48,7 +48,7 @@ int texture_init(struct texture *texture, const char *name,
 	SDL_FreeSurface(surf);
 	return RETURN_CODE_SUCCESS;
 handle_err:
-	fprintf(stderr, "Failed to initialize texture. %s\n", err_msg);
+	fprintf(stderr, "texture_init() has failed. %s\n", err_msg_get());
 	return RETURN_CODE_FAILURE;
 }
 
@@ -61,7 +61,7 @@ void texture_finish(struct texture *texture)
 int texture_bind(struct texture *texture)
 {
 	if (!texture || texture->name[0] == '\0') {
-		fprintf(stderr, "Failed to bind texture.\n");
+		fprintf(stderr, "texture_bind() has failed.\n");
 		return RETURN_CODE_FAILURE;
 	}
 	glActiveTexture(GL_TEXTURE0);
