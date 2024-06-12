@@ -7,8 +7,10 @@
 #include "input.h"
 #include "shader.h"
 
+#include "test_scene.h"
+
 #define SDL_INIT_FLAG (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
-#define IMG_INIT_FLAG (IMG_INIT_PNG)
+#define IMG_INIT_FLAG (IMG_INIT_JPG | IMG_INIT_PNG)
 
 enum game_state {
 	GAME_STATE_UNDEFINED = 0,
@@ -24,20 +26,6 @@ static struct {
 	enum game_state state;
 	bool is_running;
 } game_ctx;
-static struct shader_program shd;
-const char *vsrc = "#version 330 core\n"
-	"layout (location = 0) in vec3 aPos;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = vec4(aPos, 1.0);\n"
-	"}\0";
-const char *fsrc = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec4 ourColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = ourColor;\n"
-    "}\n\0";
 
 int game_init(void)
 {
@@ -61,7 +49,7 @@ int game_init(void)
 		err_msg = "Graphics subsystem failed to initialize.";
 		goto handle_err;
 	}
-	shader_program_init(&shd, "test", vsrc, fsrc);
+	impl_test_scene();
 	return RETURN_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "Game context initialization failed: %s\n", err_msg);
@@ -82,8 +70,9 @@ void game_update(void)
 	if (input_is_key_down(SDL_SCANCODE_ESCAPE)) {
 		game_ctx.is_running = false;
 	}
-	graphics_clear_framebuffer();
-	graphics_present_framebuffer();
+	run_test_scene();
+	/*graphics_clear_framebuffer();
+	graphics_present_framebuffer();*/
 }
 
 bool game_is_running(void)
