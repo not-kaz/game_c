@@ -2,11 +2,11 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include "common.h"
+#include "err_msg.h"
 #include "game.h"
 #include "graphics.h"
 #include "input.h"
 #include "shader.h"
-
 #include "test_scene.h"
 
 #define SDL_INIT_FLAG (SDL_INIT_VIDEO | SDL_INIT_AUDIO)
@@ -29,30 +29,28 @@ static struct {
 
 int game_init(void)
 {
-	const char *err_msg = NULL;
-
 	if (game_ctx.state != GAME_STATE_UNDEFINED) {
-		err_msg = "Game context already initialized.";
+		err_msg_set("Game context already initialized.");
 		goto handle_err;
 	}
 	game_ctx.state = GAME_STATE_GAMEPLAY;
 	game_ctx.is_running = true;
 	if (SDL_Init(SDL_INIT_FLAG) != 0) {
-		err_msg = SDL_GetError();
+		err_msg_set(SDL_GetError());
 		goto handle_err;
 	}
 	if (IMG_Init(IMG_INIT_FLAG) != IMG_INIT_FLAG) {
-		err_msg = IMG_GetError();
+		err_msg_set(IMG_GetError());
 		goto handle_err;
 	}
 	if (!graphics_init()) {
-		err_msg = "Graphics subsystem failed to initialize.";
+		err_msg_set("Graphics subsystem failed to initialize.");
 		goto handle_err;
 	}
 	impl_test_scene();
 	return RETURN_CODE_SUCCESS;
 handle_err:
-	fprintf(stderr, "Game context initialization failed: %s\n", err_msg);
+	fprintf(stderr, "game_init() has failed: %s\n", err_msg_get());
 	return RETURN_CODE_FAILURE;
 }
 
