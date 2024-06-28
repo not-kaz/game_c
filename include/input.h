@@ -1,6 +1,6 @@
 #ifndef INPUT_H
 #define INPUT_H
-#include <SDL2/SDL_Scancode.h>
+#include <SDL2/SDL_scancode.h>
 #include "common.h"
 
 void input_poll(void);
