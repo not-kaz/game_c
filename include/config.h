@@ -18,10 +18,10 @@ struct config {
 };
 
 int config_init(struct config *config, const char *name);
-void config_finish(struct config *config);
+int config_finish(struct config *config);
 int config_add_entry(struct config *config, const char *key, int val);
 int config_remove_entry(struct config *config, const char *key);
-int config_get_entry_val(struct config *config, const char *key);
+int config_get_entry_val(const struct config *config, const char *key);
 int config_read_from_file(struct config *config, const char *filename);
 
 #endif

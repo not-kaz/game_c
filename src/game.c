@@ -1,11 +1,11 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
-#include "common.h"
 #include "err_msg.h"
 #include "game.h"
 #include "graphics.h"
 #include "input.h"
+#include "result_code.h"
 #include "shader.h"
 #include "test_scene.h"
 
@@ -34,7 +34,6 @@ int game_init(void)
 		goto handle_err;
 	}
 	game_ctx.state = GAME_STATE_GAMEPLAY;
-	game_ctx.is_running = true;
 	if (SDL_Init(SDL_INIT_FLAG) != 0) {
 		err_msg_set(SDL_GetError());
 		goto handle_err;
@@ -43,15 +42,16 @@ int game_init(void)
 		err_msg_set(IMG_GetError());
 		goto handle_err;
 	}
-	if (!graphics_init()) {
-		err_msg_set("Graphics subsystem failed to initialize.");
+	if (graphics_init()) {
+		//err_msg_set("Graphics subsystem failed to initialize.");
 		goto handle_err;
 	}
 	impl_test_scene();
-	return RETURN_CODE_SUCCESS;
+	game_ctx.is_running = true;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "game_init() has failed: %s\n", err_msg_get());
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 
 void game_finish(void)

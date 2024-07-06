@@ -3,6 +3,7 @@
 #include <string.h>
 #include "camera.h"
 #include "common.h"
+#include "result_code.h"
 
 #define INITIAL_YAW -90.0f
 #define INITIAL_PITCH 0.0f
@@ -12,8 +13,8 @@ static vec3 world_up_dir = {0.0f, 1.0f, 0.0f}; // x, y, z
 int camera_init(struct camera *cam, vec3 pos, struct camera_direction dir,
 		struct camera_ctrl_params ctrl_params)
 {
-	if (!cam) {
-		return RETURN_CODE_FAILURE;
+	if (cam == NULL) {
+		return RESULT_CODE_NULL_PTR;
 	}
 	memset(cam, 0, sizeof(struct camera));
 	glm_vec3_copy(pos, cam->position);
@@ -22,12 +23,12 @@ int camera_init(struct camera *cam, vec3 pos, struct camera_direction dir,
 	cam->rotation.pitch = INITIAL_PITCH;
 	cam->ctrl_params.speed = ctrl_params.speed;
 	cam->ctrl_params.sensitivity = ctrl_params.sensitivity;
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 }
 
 void camera_finish(struct camera *cam)
 {
-	if (!cam) {
+	if (cam == NULL) {
 		return;
 	}
 	memset(cam, 0, sizeof(struct camera));

@@ -1,8 +1,8 @@
 #include <glad/gl.h>
 #include <stdio.h>
 #include <string.h>
-#include "common.h"
 #include "err_msg.h"
+#include "result_code.h"
 #include "shader.h"
 
 #define GL_MSG_MAXLEN 1024
@@ -36,7 +36,7 @@ static int compile_shader(struct shader *shader)
 		goto handle_err;
 	}
 	shader->is_compiled = true;
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	if (shader->gl_id) {
 		glDeleteShader(shader->gl_id);
@@ -45,7 +45,7 @@ handle_err:
 	if (gl_msg[0] != '\0') {
 		fprintf(stderr, "%s\n", gl_msg);
 	}
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 
 int shader_program_init(struct shader_program *program, const char *name,
@@ -109,7 +109,7 @@ int shader_program_init(struct shader_program *program, const char *name,
 		goto handle_err;
 	}
 	program->is_inited = true;
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "shader_program_init() has failed: %s\n",
 		err_msg_get());
@@ -117,7 +117,7 @@ handle_err:
 		fprintf(stderr, "%s\n", gl_msg);
 	}
 	memset(program, 0, sizeof(struct shader_program));
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 
 void shader_program_finish(struct shader_program *program)
@@ -146,9 +146,9 @@ int shader_program_set_uniform_val(struct shader_program *program,
 	}
 	loc = glGetUniformLocation(program->gl_id, uniform_name);
 	if (loc < 0) {
-		err_msg_set(
+		/*err_msg_set(
 			"glGetUniformLocation() failed. Name (%s) not found.",
-			uniform_name);
+			uniform_name);*/
 		goto handle_err;
 	}
 	switch (type) {
@@ -159,10 +159,10 @@ int shader_program_set_uniform_val(struct shader_program *program,
 		err_msg_set( "Incorrect type provided.");
 		goto handle_err;
 	}
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "shader_program_set_uniform_val() has failed: %s\n",
 		err_msg_get());
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 

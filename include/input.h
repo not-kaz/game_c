@@ -1,7 +1,6 @@
 #ifndef INPUT_H
 #define INPUT_H
-#include <SDL2/SDL_scancode.h>
-#include "common.h"
+#include <SDL_scancode.h>
 
 void input_poll(void);
 bool input_is_key_down(SDL_Scancode scancode);

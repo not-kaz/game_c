@@ -1,10 +1,12 @@
 #include <glad/gl.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include <stdio.h>
 #include <string.h>
 #include "common.h"
 #include "err_msg.h"
 #include "texture.h"
+
+#include "result_code.h"
 
 int texture_init(struct texture *texture, const char *name,
 		const char *img_filepath)
@@ -38,18 +40,18 @@ int texture_init(struct texture *texture, const char *name,
 	// TODO: Check if any of the following functions return on failure.
 	glGenTextures(1, &texture->gl_id);
 	glBindTexture(GL_TEXTURE_2D, texture->gl_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surf->w, surf->h, 0, GL_RGB,
+		GL_UNSIGNED_BYTE, surf->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surf->w, surf->h, 0, GL_RGB,
-		GL_UNSIGNED_BYTE, surf->pixels);
-	glGenerateMipmap(GL_TEXTURE_2D);
 	SDL_FreeSurface(surf);
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	fprintf(stderr, "texture_init() has failed. %s\n", err_msg_get());
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 
 void texture_finish(struct texture *texture)
@@ -60,11 +62,14 @@ void texture_finish(struct texture *texture)
 
 int texture_bind(struct texture *texture)
 {
-	if (!texture || texture->name[0] == '\0') {
+	if (texture == NULL) {
 		fprintf(stderr, "texture_bind() has failed.\n");
-		return RETURN_CODE_FAILURE;
+		return RESULT_CODE_NULL_PTR;
+	}
+	if (texture->name[0] == '\0') {
+		return RESULT_CODE_PARAM_INVALID;
 	}
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->gl_id);
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 }

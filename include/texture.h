@@ -9,7 +9,7 @@ struct texture {
 };
 
 int texture_init(struct texture *texture, const char *name,
-		const char *img_filepath);
+	const char *img_filepath);
 void texture_finish(struct texture *texture);
 int texture_bind(struct texture *texture);
 

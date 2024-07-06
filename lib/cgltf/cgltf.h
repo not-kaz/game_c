@@ -886,11 +886,6 @@ cgltf_size cgltf_animation_channel_index(const cgltf_animation* animation, const
  *
  */
 
-#if defined(__INTELLISENSE__) || defined(__JETBRAINS_IDE__)
-/* This makes MSVC/CLion intellisense work. */
-#define CGLTF_IMPLEMENTATION
-#endif
-
 #ifdef CGLTF_IMPLEMENTATION
 
 #include <assert.h> /* For assert */
@@ -1697,20 +1692,7 @@ cgltf_result cgltf_validate(cgltf_data* data)
 	{
 		if (data->nodes[i].weights && data->nodes[i].mesh)
 		{
-			CGLTF_ASSERT_IF(data->nodes[i].mesh->primitives_count && data->nodes[i].mesh->primitives[0].targets_count != data->nodes[i].weights_count, cgltf_result_invalid_gltf);
-		}
-
-		if (data->nodes[i].has_mesh_gpu_instancing)
-		{
-			CGLTF_ASSERT_IF(data->nodes[i].mesh == NULL, cgltf_result_invalid_gltf);
-			CGLTF_ASSERT_IF(data->nodes[i].mesh_gpu_instancing.attributes_count == 0, cgltf_result_invalid_gltf);
-
-			cgltf_accessor* first = data->nodes[i].mesh_gpu_instancing.attributes[0].data;
-
-			for (cgltf_size k = 0; k < data->nodes[i].mesh_gpu_instancing.attributes_count; ++k)
-			{
-				CGLTF_ASSERT_IF(data->nodes[i].mesh_gpu_instancing.attributes[k].data->count != first->count, cgltf_result_invalid_gltf);
-			}
+			CGLTF_ASSERT_IF (data->nodes[i].mesh->primitives_count && data->nodes[i].mesh->primitives[0].targets_count != data->nodes[i].weights_count, cgltf_result_invalid_gltf);
 		}
 	}
 
@@ -2224,7 +2206,6 @@ static cgltf_float cgltf_component_read_float(const void* in, cgltf_component_ty
 	{
 		switch (component_type)
 		{
-			// note: glTF spec doesn't currently define normalized conversions for 32-bit integers
 			case cgltf_component_type_r_16:
 				return *((const int16_t*) in) / (cgltf_float)32767;
 			case cgltf_component_type_r_16u:
@@ -2478,7 +2459,7 @@ cgltf_size cgltf_accessor_read_index(const cgltf_accessor* accessor, cgltf_size 
 {
 	if (accessor->is_sparse)
 	{
-		return 0; // This is an error case, but we can't communicate the error with existing interface.
+		return 0;
 	}
 	if (accessor->buffer_view == NULL)
 	{
@@ -2487,7 +2468,6 @@ cgltf_size cgltf_accessor_read_index(const cgltf_accessor* accessor, cgltf_size 
 	const uint8_t* element = cgltf_buffer_view_data(accessor->buffer_view);
 	if (element == NULL)
 	{
-		return 0; // This is an error case, but we can't communicate the error with existing interface.
 	}
 	element += accessor->offset + accessor->stride * index;
 	return cgltf_component_read_index(element, accessor->component_type);
@@ -3670,7 +3650,6 @@ static int cgltf_parse_json_accessor(cgltf_options* options, jsmntok_t const* to
 		{
 			++i;
 			out_accessor->has_min = 1;
-			// note: we can't parse the precise number of elements since type may not have been computed yet
 			int min_size = tokens[i].size > 16 ? 16 : tokens[i].size;
 			i = cgltf_parse_json_float_array(tokens, i, json_chunk, out_accessor->min, min_size);
 		}
@@ -3678,7 +3657,6 @@ static int cgltf_parse_json_accessor(cgltf_options* options, jsmntok_t const* to
 		{
 			++i;
 			out_accessor->has_max = 1;
-			// note: we can't parse the precise number of elements since type may not have been computed yet
 			int max_size = tokens[i].size > 16 ? 16 : tokens[i].size;
 			i = cgltf_parse_json_float_array(tokens, i, json_chunk, out_accessor->max, max_size);
 		}
@@ -6451,9 +6429,6 @@ cgltf_result cgltf_parse_json(cgltf_options* options, const uint8_t* json_chunk,
 		options->memory.free_func(options->memory.user_data, tokens);
 		return cgltf_result_invalid_json;
 	}
-
-	// this makes sure that we always have an UNDEFINED token at the end of the stream
-	// for invalid JSON inputs this makes sure we don't perform out of bound reads of token data
 	tokens[token_count].type = JSMN_UNDEFINED;
 
 	cgltf_data* data = (cgltf_data*)options->memory.alloc_func(options->memory.user_data, sizeof(cgltf_data));

@@ -1,10 +1,9 @@
 #include <glad/gl.h>
-#include <SDL2/SDL.h>
-#include <stdbool.h>
+#include <SDL.h>
 #include <stdio.h>
-#include "common.h"
 #include "config.h"
 #include "graphics.h"
+#include "result_code.h"
 
 #define MAX_NUM_DISPLAY_MODES 512
 
@@ -26,7 +25,7 @@ static int fetch_display_modes(void)
 	display.num_modes = SDL_GetNumDisplayModes(display.idx);
 	if (display.num_modes < 1 ) {
 		fprintf(stderr, "Failed to fetch available display modes.\n");
-		return RETURN_CODE_FAILURE;
+		return RESULT_CODE_UNSPECIFIED_ERROR;
 	}
 	if (display.num_modes > MAX_NUM_DISPLAY_MODES) {
 		fprintf(stderr, "Number of found display modes found (%d) "
@@ -38,10 +37,10 @@ static int fetch_display_modes(void)
 	for (int i = 0; i < display.num_modes; i++) {
 		if (SDL_GetDisplayMode(display.idx, i, &display.modes[i]) < 0) {
 			fprintf(stderr, "Failed to retrieve display info.\n");
-			return RETURN_CODE_FAILURE;
+			return RESULT_CODE_UNSPECIFIED_ERROR;
 		}
 	}
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 }
 
 int graphics_init(void)
@@ -54,10 +53,10 @@ int graphics_init(void)
 
 	if (sdl_ctx.window || sdl_ctx.gl_ctx) {
 		fprintf(stderr, "Attempted to initialize SDL context again.\n");
-		return RETURN_CODE_FAILURE;
+		return RESULT_CODE_UNSPECIFIED_ERROR;
 	}
 	memset(&display, 0, sizeof(display));
-	if (!fetch_display_modes()) {
+	if (fetch_display_modes()) {
 		err_msg = "Could not fetch necessary display info.";
 		goto handle_err;
 	}
@@ -104,7 +103,7 @@ int graphics_init(void)
 	// TODO: We need to call glViewport() every time window resizes.
 	glViewport(0, 0, ww, wh);
 	//config_store_to_file(&graphics_config, "graphics.cfg");
-	return RETURN_CODE_SUCCESS;
+	return RESULT_CODE_SUCCESS;
 handle_err:
 	memset(&display, 0, sizeof(display));
 	config_finish(&graphics_config);
@@ -116,7 +115,7 @@ handle_err:
 	if (sdl_msg) {
 		fprintf(stderr, "%s\n", sdl_msg);
 	}
-	return RETURN_CODE_FAILURE;
+	return RESULT_CODE_UNSPECIFIED_ERROR;
 }
 
 void graphics_finish(void)
@@ -131,7 +130,7 @@ void graphics_finish(void)
 
 void graphics_clear_framebuffer(void)
 {
-	glClearColor(0.1f, 0.5f, 0.3f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
