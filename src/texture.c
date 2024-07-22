@@ -2,7 +2,6 @@
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string.h>
-#include "common.h"
 #include "err_msg.h"
 #include "texture.h"
 
@@ -11,10 +10,10 @@
 int texture_init(struct texture *texture, const char *name,
 		const char *img_filepath)
 {
-	size_t len = 0;
+	size_t len;
 	SDL_Surface *surf = NULL;
 
-	if (!texture || !name || !img_filepath) {
+	if (texture == NULL || name == NULL || img_filepath == NULL) {
 		err_msg_set("Invalid parameters.");
 		goto handle_err;
 	}
@@ -31,7 +30,7 @@ int texture_init(struct texture *texture, const char *name,
 	memset(texture, 0, sizeof(struct texture));
 	strncpy(texture->name, name, len);
 	surf = IMG_Load(img_filepath);
-	if (!surf) {
+	if (surf == NULL) {
 		err_msg_set(IMG_GetError());
 		goto handle_err;
 	}
@@ -60,7 +59,7 @@ void texture_finish(struct texture *texture)
 	memset(texture, 0, sizeof(struct texture));
 }
 
-int texture_bind(struct texture *texture)
+int texture_bind(const struct texture *texture)
 {
 	if (texture == NULL) {
 		fprintf(stderr, "texture_bind() has failed.\n");

@@ -16,8 +16,8 @@ struct list {
 	struct list_node *tail;
 };
 
-void list_append_node(struct list *list, struct list_node *node);
-void list_prepend_node(struct list *list, struct list_node *node);
-void list_remove_node(struct list *list, struct list_node *node);
+int list_append_node(struct list *list, struct list_node *node);
+int list_prepend_node(struct list *list, struct list_node *node);
+int list_remove_node(struct list *list, struct list_node *node);
 
 #endif

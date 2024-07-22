@@ -21,6 +21,15 @@ const char *result_code_to_str(int code)
 	case RESULT_CODE_NULL_PTR:
 		str = "Unexpected null pointer.";
 		break;
+	case RESULT_CODE_LIMIT_EXCEEDED:
+		str = "Limit exceeded.";
+		break;
+	case RESULT_CODE_READ_ERROR:
+		str = "Read error occurred.";
+		break;
+	case RESULT_CODE_PARAM_INVALID:
+		str = "Function parameters provided are invalid.";
+		break;
 	default:
 		str = "Result code invalid.";
 		break;
