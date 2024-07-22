@@ -55,7 +55,8 @@ int shader_program_init(struct shader_program *program, const char *name,
 	int gl_res = 0;
 	char gl_msg[GL_MSG_MAXLEN] = {'\0'};
 
-	if (!program || !name || !vertex_shader_src || !fragment_shader_src) {
+	if (program == NULL || name == NULL
+		|| vertex_shader_src == NULL || fragment_shader_src == NULL) {
 		err_msg_set(
 			"One or more arguments are not valid.");
 		goto handle_err;
@@ -139,7 +140,7 @@ int shader_program_set_uniform_val(struct shader_program *program,
 {
 	int loc = -1;
 
-	if (!program || !uniform_name || !val) {
+	if (program == NULL || uniform_name == NULL || val == NULL) {
 		err_msg_set(
 			"Unable to set shader uniform value. Invalid params.");
 		goto handle_err;

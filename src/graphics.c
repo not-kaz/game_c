@@ -78,7 +78,7 @@ int graphics_init(void)
 	}
 	sdl_ctx.window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, ww, wh, wf);
-	if (!sdl_ctx.window) {
+	if (sdl_ctx.window == NULL) {
 		err_msg = "Failed to create SDL window.";
 		sdl_msg = SDL_GetError();
 		goto handle_err;
@@ -90,7 +90,7 @@ int graphics_init(void)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	sdl_ctx.gl_ctx = SDL_GL_CreateContext(sdl_ctx.window);
-	if (!sdl_ctx.gl_ctx) {
+	if (sdl_ctx.gl_ctx == NULL) {
 		err_msg = "Failed to create SDL GL context.";
 		sdl_msg = SDL_GetError();
 		goto handle_err;

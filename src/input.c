@@ -1,11 +1,10 @@
 #include <SDL.h>
 #include <stdbool.h>
-#include "common.h"
 #include "input.h"
 
 void input_poll(void)
 {
-	SDL_Event event = {0};
+	SDL_Event event;
 
 	SDL_PollEvent(&event);
 	if (event.type == SDL_QUIT) {
@@ -18,7 +17,7 @@ bool input_is_key_down(SDL_Scancode scancode)
 	const uint8_t *keyboard_state = NULL;
 
 	keyboard_state = SDL_GetKeyboardState(NULL);
-	if (scancode > SDL_NUM_SCANCODES || !keyboard_state) {
+	if (scancode > SDL_NUM_SCANCODES || keyboard_state == NULL) {
 		return false;
 	}
 	return (bool) keyboard_state[scancode];
